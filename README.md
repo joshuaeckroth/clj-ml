@@ -120,7 +120,7 @@ API documenation can be found [here](http://antoniogarrote.github.com/clj-ml/ind
     REPL>(use 'clj-ml.classifiers)
 
     REPL>; Building a classifier using a  C4.5 decission tree
-    REPL>(def classifier (make-classifier :decission-tree :c45))
+    REPL>(def classifier (make-classifier :decision-tree :c45))
 
     REPL>; We set the class attribute for the loaded dataset
     REPL>(dataset-set-class ds 4)
