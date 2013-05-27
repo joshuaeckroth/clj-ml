@@ -111,9 +111,9 @@ API documenation can be found [here](http://antoniogarrote.github.com/clj-ml/ind
 
 
     REPL>; The eqivalent operation can be done with the ->> macro and make-apply-filter fn:
-    REPL>(def filtered-ds (->> "file:///Applications/weka-3-6-2/data/iris.arff")
-                               (load-instances :arff)
-                               (make-apply-filter :unsupervised-discretize {:attributes [0 2]}))
+    REPL>(def filtered-ds (->> "file:///home/kiran/Downloads/weka/weka-3-6-9/data/iris.arff"
+                            (load-instances :arff)
+                            (make-apply-filter :unsupervised-discretize {:attributes [0 2]})))
 
 ### Using classifiers
 
