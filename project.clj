@@ -4,7 +4,7 @@
   :license {:name "MIT License"
             :url "http://opensource.org/licenses/MIT"}
   :url "https://github.com/joshuaeckroth/clj-ml"
-  :dependencies [[nz.ac.waikato.cms.weka/weka-dev "3.7.5"]
+  :dependencies [[nz.ac.waikato.cms.weka/weka-dev "3.7.10"]
                  [org.clojure/data.xml "0.0.7"]
                  [org.apache.lucene/lucene-analyzers-common "4.3.0"]]
   :profiles {:dev
