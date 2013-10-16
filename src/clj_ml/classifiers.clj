@@ -65,10 +65,10 @@
            (weka.core Instance Instances)
            (weka.classifiers.lazy IBk)
            (weka.classifiers.trees J48 RandomForest M5P)
-           (weka.classifiers.meta LogitBoost AdditiveRegression RotationForest)
+           (weka.classifiers.meta LogitBoost AdditiveRegression)
            (weka.classifiers.bayes NaiveBayes NaiveBayesUpdateable)
-           (weka.classifiers.functions MultilayerPerceptron SMO LinearRegression Logistic PaceRegression SPegasos LibSVM)
-           (weka.classifiers Classifier Evaluation)))
+           (weka.classifiers.functions MultilayerPerceptron SMO LinearRegression Logistic)
+           (weka.classifiers AbstractClassifier Classifier Evaluation)))
 
 
 ;; Setting up classifier options
@@ -137,55 +137,6 @@
                                 :folds-for-cross-validation "-V"
                                 :random-seed "-W"}))))
 
-(defmethod make-classifier-options [:support-vector-machine :spegasos]
-  ([kind algorithm m]
-     (->> (check-options m {:no-normalization "-N"
-                            :no-replace-missing"-M"})
-          (check-option-values m
-                               {:loss-fn "-F"
-                                :epochs "-E"
-                                :lambda "-L"}))))
-
-(defmethod make-classifier-options [:support-vector-machine :libsvm]
-  ([kind algorithm m]
-     (->> (check-options m {:normalization "-Z"
-                            :no-nominal-to-binary "-J"
-                            :no-missing-value-replacement "-V"
-                            :no-shrinking-heuristics "-H"
-                            :probability-estimates "-B"})
-          (check-option-values m
-                               {:svm-type "-S"
-                                :kernel-type "-K"
-                                :kernel-degree "-D"
-                                :kernel-gamma "-G"
-                                :kernel-coef0 "-R"
-                                :param-C "-C"
-                                :param-nu "-N"
-                                :loss-epsilon "-P"
-                                :memory-cache "-M"
-                                :tolerance-of-termination "-E"
-                                :class-weight "-W"
-                                :random-seed "-seed"}))))
-
-(defmethod make-classifier-options [:support-vector-machine :libsvm-grid]
-  ([kind algorithm m]
-     (->> (check-options m {:normalization "-Z"
-                            :no-nominal-to-binary "-J"
-                            :no-missing-value-replacement "-V"
-                            :no-shrinking-heuristics "-H"
-                            :probability-estimates "-B"})
-          (check-option-values m
-                               {:svm-type "-S"
-                                :kernel-type "-K"
-                                :kernel-degree "-D"
-                                :kernel-coef0 "-R"
-                                :param-nu "-N"
-                                :loss-epsilon "-P"
-                                :memory-cache "-M"
-                                :tolerance-of-termination "-E"
-                                :class-weight "-W"
-                                :random-seed "-seed"}))))
-
 (defmethod make-classifier-options [:regression :linear]
   ([kind algorithm m]
      (->> (check-options m {:debug "-D"
@@ -200,13 +151,6 @@
           (check-option-values m
                                {:max-iterations "-S"
                                 :ridge "-R"}))))
-
-(defmethod make-classifier-options [:regression :pace]
-  ([kind algorithm m]
-     (->> (check-options m {:debug "-D"})
-          (check-option-values m
-                               {:shrinkage "-S"
-                                :estimator "-E"}))))
 
 (defmethod make-classifier-options [:regression :boosted-regression]
   ([kind algorithm m]
@@ -239,20 +183,6 @@
                             :num-features-to-consider "-K"
                             :random-seed "-S"
                             :depth "-depth"}))))
-
-(defmethod make-classifier-options [:decision-tree :rotation-forest]
-  ([kind algorithm m]
-     (->>
-      (check-options m {:debug "-D"})
-      (check-option-values m
-                           {:num-iterations "-I"
-                            :use-number-of-groups "-N"
-                            :min-attribute-group-size "-G"
-                            :max-attribute-group-size "-H"
-                            :percentage-of-instances-to-remove "-P"
-                            :filter "-F"
-                            :random-seed "-S"
-                            :weak-learning-class "-W"}))))
 
 (defmethod make-classifier-options [:decision-tree :m5p]
   ([kind algorithm m]
@@ -291,13 +221,11 @@
      - :decision-tree :boosted-decision-tree
      - :decision-tree :M5P
      - :decision-tree :random-forest
-     - :decision-tree :rotation-forest
      - :bayes :naive
      - :neural-network :mutilayer-perceptron
      - :support-vector-machine :smo
      - :regression :linear
      - :regression :logistic
-     - :regression :pace
 
    Optionally, a map of options can also be passed as an argument with
    a set of classifier specific options.
@@ -424,10 +352,6 @@
             Value of the seed for the random generator. Values should be longs greater than
             0. Default value: 1
 
-     * :support-vector-machine :libsvm
-
-       TODO
-
      * :regression :linear
 
       Parameters:
@@ -485,22 +409,6 @@
            (.setKernel classifier real-kernel)))
        classifier)))
 
-(defmethod make-classifier [:support-vector-machine :spegasos]
-  ([kind algorithm & options]
-     (make-classifier-with kind algorithm SPegasos options)))
-
-(defmethod make-classifier [:support-vector-machine :libsvm]
-  ([kind algorithm & options]
-     (make-classifier-with kind algorithm LibSVM options)))
-
-(defmethod make-classifier [:support-vector-machine :libsvm-grid]
-  ([kind algorithm & options]
-     (for [c (range -5 17 2) g (range 3 -17 -2)]
-       (make-classifier-with
-        :support-vector-machine :libsvm
-        LibSVM (concat options [:param-C (Math/pow 2.0 c)
-                                :kernel-gamma (Math/pow 2.0 g)])))))
-
 (defmethod make-classifier [:regression :linear]
   ([kind algorithm & options]
      (make-classifier-with kind algorithm LinearRegression options)))
@@ -508,10 +416,6 @@
 (defmethod make-classifier [:regression :logistic]
   ([kind algorithm & options]
      (make-classifier-with kind algorithm Logistic options)))
-
-(defmethod make-classifier [:regression :pace]
-  ([kind algorithm & options]
-     (make-classifier-with kind algorithm PaceRegression options)))
 
 (defmethod make-classifier [:regression :boosted-regression]
   ([kind algorithm & options]
@@ -524,10 +428,6 @@
 (defmethod make-classifier [:decision-tree :random-forest]
   ([kind algorithm & options]
      (make-classifier-with kind algorithm RandomForest options)))
-
-(defmethod make-classifier [:decision-tree :rotation-forest]
-  ([kind algorithm & options]
-     (make-classifier-with kind algorithm RotationForest options)))
 
 (defmethod make-classifier [:decision-tree :m5p]
   ([kind algorithm & options]
@@ -543,8 +443,8 @@
 
 (defn classifier-copy
   "Performs a deep copy of the classifier"
-  [^Classifier classifier]
-  (Classifier/makeCopy classifier))
+  [^AbstractClassifier classifier]
+  (AbstractClassifier/makeCopy classifier))
 
 (defn classifier-copy-and-train
   "Performs a deep copy of the classifier, trains the copy, and returns it."

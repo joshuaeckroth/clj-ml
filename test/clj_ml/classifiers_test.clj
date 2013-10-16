@@ -83,13 +83,6 @@
         res (classifier-evaluate c :cross-validation ds 2)]
     (is (= 28 (count (keys res))))))
 
-(deftest classifier-evaluate-cross-validation-grid
-  (let [c (make-classifier :support-vector-machine :libsvm-grid)
-        ds (make-dataset "test" [:a :b {:c [:m :n]}] [[1 2 :m] [4 5 :m]])
-        _  (dataset-set-class ds 2)
-        res (classifier-evaluate c :cross-validation ds 2)]
-    (is (= 28 (count (keys res))))))
-
 (deftest test-classifier-classify
   (let [c (make-classifier :decision-tree :c45)
         ds (-> (make-dataset "test" [:a :b {:c [:m :n]}] [[1 2 :m] [4 5 :m]])

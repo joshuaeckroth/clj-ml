@@ -16,7 +16,7 @@
   (:require [clojure.string :as str])
   (:require [clojure.set :as set])
   (:use [clojure.java.io :only [file]])
-  (:import (weka.core Instance Instances FastVector Attribute)
+  (:import (weka.core Instance DenseInstance Instances FastVector Attribute)
            (cljml ClojureInstances)))
 
 (declare dataset-seq)
@@ -134,8 +134,7 @@
   ([dataset vector]
      (make-instance dataset 1 vector))
   ([dataset weight vector]
-     (let [^Instance inst (new Instance
-                               (count vector))]
+     (let [^Instance inst (new DenseInstance (count vector))]
        (do (.setDataset inst dataset)
            (loop [vs vector
                   c 0]

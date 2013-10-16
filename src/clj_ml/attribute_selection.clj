@@ -6,10 +6,9 @@
            [weka.attributeSelection
             ASEvaluation ASSearch
             InfoGainAttributeEval GainRatioAttributeEval OneRAttributeEval ReliefFAttributeEval
-            SymmetricalUncertAttributeEval ChiSquaredAttributeEval
-            AttributeSelection CfsSubsetEval
+            SymmetricalUncertAttributeEval AttributeSelection CfsSubsetEval
             ;; search
-            GreedyStepwise BestFirst GeneticSearch Ranker RankSearch LinearForwardSelection]))
+            GreedyStepwise BestFirst Ranker]))
 
 (defmulti  #^{:skip-wiki true}
   make-obj-options
@@ -75,61 +74,6 @@
 ;;  "Specify a starting set of attributes."
 ;;  -C :direction ...)
 
-(defmethod make-obj-options :linear-forward
-  ;; LinearForwardSelection:
-  ;;
-  ;; Extension of BestFirst. Takes a restricted number of k attributes into account. Fixed-set selects a fixed number k of attributes, whereas k is increased in each step when fixed-width is selected. The search uses either the initial ordering to select the top k attributes, or performs a ranking (with the same evalutator the search uses later on). The search direction can be forward, or floating forward selection (with opitional backward search steps).
-  ;;
-  ;; For more information see:
-  ;;
-  ;; Martin Guetlein (2006). Large Scale Attribute Selection Using Wrappers. Freiburg, Germany.
-  ;;
-  ;; Valid options are:
-  ;;
-  ;;  -P <start set>
-  ;;   Specify a starting set of attributes.
-  ;;   Eg. 1,3,5-7.
-  ;;
-  ;;  -D <0 = forward selection | 1 = floating forward selection>
-  ;;   Forward selection method. (default = 0).
-  ;;
-  ;;  -N <num>
-  ;;   Number of non-improving nodes to
-  ;;   consider before terminating search.
-  ;;
-  ;;  -I
-  ;;   Perform initial ranking to select the
-  ;;   top-ranked attributes.
-  ;;
-  ;;  -K <num>
-  ;;   Number of top-ranked attributes that are
-  ;;   taken into account by the search.
-  ;;
-  ;;  -T <0 = fixed-set | 1 = fixed-width>
-  ;;   Type of Linear Forward Selection (default = 0).
-  ;;
-  ;;  -S <num>
-  ;;   Size of lookup cache for evaluated subsets.
-  ;;   Expressed as a multiple of the number of
-  ;;   attributes in the data set. (default = 1)
-  ;;
-  ;;  -Z
-  ;;   verbose on/off
-  ([kind m]
-     (let [weka-opts (->>
-                      (extract-attributes "-P" :starting-attributes)
-                      (check-options m {:perform-initial-ranking "-I"})
-                      (check-option-values m
-                                           {:num-non-inproving "-N"
-                                            :num-attrs-in-search "-K"
-                                            :subset-eval-cache-size "-S"}))]
-       (conj weka-opts "-D" (case (m :direction)
-                              :backward "0"
-                              :forward "1"
-                              :bi-directional "2"
-                              "1"))
-       )))
-
 (defmethod make-obj-options :best-first
   ;; BestFirst:
   ;; Searches the space of attribute subsets by greedy hillclimbing augmented with a backtracking facility. Setting the
@@ -165,69 +109,6 @@
                               :forward "1"
                               :bi-directional "2"
                               "1")))))
-
-(defmethod make-obj-options :genetic
-  ;; GeneticSearch:
-  ;;
-  ;; Performs a search using the simple genetic algorithm described in Goldberg (1989).
-  ;;
-  ;; For more information see:
-  ;;
-  ;; David E. Goldberg (1989). Genetic algorithms in search, optimization and machine learning. Addison-Wesley.
-  ;;
-  ;; BibTeX:
-  ;;
-  ;;  @book{Goldberg1989,
-  ;;     author = {David E. Goldberg},
-  ;;     publisher = {Addison-Wesley},
-  ;;     title = {Genetic algorithms in search, optimization and machine learning},
-  ;;     year = {1989},
-  ;;     ISBN = {0201157675}
-  ;;  }
-  ;;
-  ;;
-  ;; Valid options are:
-  ;;
-  ;;  -P <start set>
-  ;;   Specify a starting set of attributes.
-  ;;   Eg. 1,3,5-7.If supplied, the starting set becomes
-  ;;   one member of the initial random
-  ;;   population.
-  ;;
-  ;;  -Z <population size>
-  ;;   Set the size of the population (even number).
-  ;;   (default = 20).
-  ;;
-  ;;  -G <number of generations>
-  ;;   Set the number of generations.
-  ;;   (default = 20)
-  ;;
-  ;;  -C <probability of crossover>
-  ;;   Set the probability of crossover.
-  ;;   (default = 0.6)
-  ;;
-  ;;  -M <probability of mutation>
-  ;;   Set the probability of mutation.
-  ;;   (default = 0.033)
-  ;;
-  ;;  -R <report frequency>
-  ;;   Set frequency of generation reports.
-  ;;   e.g, setting the value to 5 will
-  ;;   report every 5th generation
-  ;;   (default = number of generations)
-  ;;
-  ;;  -S <seed>
-  ;;   Set the random number seed.
-  ;;   (default = 1)
-  ([kind m]
-     (->> (extract-attributes "-P" :starting-attributes)
-          (check-option-values m
-                               {:population-size "-Z"
-                                :num-generations "-G"
-                                :crossover-prob "-C"
-                                :mutation-prob "-M"
-                                :report-freq "-R"
-                                :random-seed "-S"}))))
 
 (defmethod make-obj-options :cfs-subset-eval
   ;; CfsSubsetEval :
@@ -282,13 +163,6 @@
   ;; Evaluates the worth of an attribute by measuring the information gain with respect to the class.
   ;;
   ;; InfoGain(Class,Attribute) = H(Class) - H(Class | Attribute).
-  ([kind m]
-     (attribute-eval-options m)))
-
-(defmethod make-obj-options :chi-squared
-  ;; ChiSquaredAttributeEval :
-  ;;
-  ;; Evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
   ([kind m]
      (attribute-eval-options m)))
 
@@ -413,15 +287,12 @@
    ;; Searches
    :greedy GreedyStepwise
    :best-first BestFirst
-   :genetic GeneticSearch
    :ranker Ranker
-   :linear-forward LinearForwardSelection
    ;; Evals
    :cfs-subset-eval CfsSubsetEval
    :info-gain InfoGainAttributeEval
    :gain-ratio GainRatioAttributeEval
    :symmetrical-uncert SymmetricalUncertAttributeEval
-   :chi-squared ChiSquaredAttributeEval
    :one-R OneRAttributeEval
    :relief ReliefFAttributeEval
    })
@@ -437,9 +308,6 @@
 
 (defn best-first [& {:as options}]
   (make-weka-obj :best-first options))
-
-(defn genetic [& {:as options}]
-  (make-weka-obj :genetic options))
 
 (defn cfs-subset-eval [& {:as options}]
   (make-weka-obj :cfs-subset-eval options))
@@ -464,14 +332,6 @@
 
 (defn ranker [& {:as options}]
   (make-weka-obj :ranker options))
-
-(defn rank-search
-  [& {:keys [evaluator step-size start-point] :as opts}]
-  (let [^RankSearch search (RankSearch.)]
-    (when evaluator (.setAttributeEvaluator search evaluator))
-    (when step-size (.setStepSize search step-size))
-    (when start-point (.setStartPoint search start-point))
-    search))
 
 (defn attribute-selector
   "Returns an attibute selector.  A search and evaluator object are required.  You may

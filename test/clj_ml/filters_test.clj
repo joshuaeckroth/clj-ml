@@ -281,7 +281,7 @@
                                   (-> instance
                                       instance-to-vector
                                       (conj (- a-max (.value instance 0)))
-                                      (#(weka.core.Instance. 1 (into-array Double/TYPE %)))
+                                      (#(weka.core.DenseInstance. 1 (into-array Double/TYPE %)))
                                       add-instance))
                                 result))
         res (clj-batch ds
