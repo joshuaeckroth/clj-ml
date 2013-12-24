@@ -511,37 +511,47 @@ split immediately you can use do-split-dataset."
 
 ;; text-document datasets
 
-(defn str-to-fname
-  [s]
-  (str/replace s #"\W" "_"))
-
 (defn dataset-filename
-  [datadir vocab term tag]
-  (format "%s/instances/%s-%s-%s.arff" datadir (str-to-fname vocab) (str-to-fname term) (name tag)))
+  [model-prefix model-dir tag]
+  (format "%s/instances/%s-%s.arff" model-dir model-prefix (name tag)))
 
 (defn docs-to-dataset
-  [docs vocab term keep-n datadir & opts]
+  "Docs are expected to be maps with this structure: {:id
+  [any], :has-class? [true/false], :title [string], :fulltext
+  [string]}. Of course, title or fulltext could be nil. model-prefix
+  is a filename prefix to saving/loading the model (necessary to
+  initialize the string-to-wordvec filters), and model-dir is a folder
+  to save/load the model.
+
+  opts are optional parameters: :keep-n [int], :lowercase
+  [true/false], :words-to-keep [int], :normalize [int], :transform-tf
+  [true/false], :transform-idf [true/false], :stemmer
+  [true/false], :resample [true/false], :training
+  [true/false], :testing [true/false].
+
+  A map is returned with structure {:dataset [the dataset], :docids
+  [seq of docids as ordered in dataset]}."
+  [docs model-prefix model-dir & opts]
   (let [parsed-opts (apply hash-map opts)
         original-ordering (map :id docs)
-        docid-map (into {} (for [doc docs] [(:id doc) doc]))
-        docs-with-term (filter (fn [doc] (some #{term} (get-in doc [:terms vocab]))) docs)
-        docs-without-term (let [dwt (filter (fn [doc] (not-any? #{term} (get-in doc [:terms vocab]))) docs)]
-                            (if (:resample parsed-opts)
-                              (take (count docs-with-term) dwt)
-                              dwt))
-        docs-keep-n (if keep-n (concat (take (/ keep-n 2) docs-with-term)
-                                       (take (/ keep-n 2) docs-without-term))
-                        (concat docs-with-term docs-without-term))
-        docs-ordered (for [docid original-ordering] (docid-map docid))
+        docs-with-class (filter :has-class? doc)
+        docs-without-class (let [dwoc (filter #(not (:has-class? %)) docs)]
+                             (if (:resample parsed-opts)
+                               (take (count docs-with-class) dwoc)
+                               dwoc))
+        docs-keep-n (if (:keep-n parsed-opts)
+                      (concat (take (/ (:keep-n parsed-opts) 2) docs-with-class)
+                              (take (/ (:keep-n parsed-opts) 2) docs-without-class))
+                      (concat docs-with-class docs-without-class))
+        docs-shuffled (my-shuffle (sort-by :id docs-keep-n))
         ds (make-dataset
             :docs [{:class [:no :yes]} {:title nil} {:fulltext nil}]
-            (for [doc docs-ordered]
+            (for [doc docs-shuffled]
               (let [orig-fulltext (:fulltext doc "")
                     fulltext (str/replace orig-fulltext #"\s+" " ")
                     fulltext-fixed (str/replace fulltext #"[^ \w\d]" "")
-                    title (str/replace (:title doc "") #"[^ \w\d]" "")
-                    has-tid? (some #{term} (get-in doc [:terms vocab]))]
-                [(if has-tid? :yes :no) title fulltext-fixed])))
+                    title (str/replace (:title doc "") #"[^ \w\d]" "")]
+                [(if (:has-class? doc) :yes :no) title fulltext-fixed])))
         ds-title (let [f (filters/make-filter
                           :string-to-word-vector
                           {:dataset-format ds
@@ -556,7 +566,7 @@ split immediately you can use do-split-dataset."
                                       "weka.core.stemmers.SnowballStemmer -S English")})]
                    ;; if testing, initialize the filter with the training instances
                    (when (:testing parsed-opts)
-                     (let [ds-file (file (dataset-filename datadir vocab term :orig))]
+                     (let [ds-file (file (dataset-filename model-prefix model-dir :orig))]
                        (filters/filter-apply f (load-instances :arff ds-file))))
                    (filters/filter-apply f ds))
         ds-title-fulltext (let [f (filters/make-filter
@@ -573,13 +583,13 @@ split immediately you can use do-split-dataset."
                                                "weka.core.stemmers.SnowballStemmer -S English")})]
                             ;; if testing, initialize the filter with the training instances
                             (when (:testing parsed-opts)
-                              (let [ds-file (file (dataset-filename datadir vocab term :title))]
+                              (let [ds-file (file (dataset-filename model-prefix model-dir :title))]
                                 (filters/filter-apply f (load-instances :arff ds-file))))
                             (filters/filter-apply f ds-title))
         ds-class (dataset-set-class ds-title-fulltext 0)]
     ;; if training, save unfiltered instances to re-initialize filter later
     (when (:training parsed-opts)
-      (save-instances :arff (file (dataset-filename datadir vocab term :orig)) ds)
-      (save-instances :arff (file (dataset-filename datadir vocab term :title)) ds-title))
-    ds-class))
+      (save-instances :arff (file (dataset-filename model-prefix model-dir :orig)) ds)
+      (save-instances :arff (file (dataset-filename model-prefix model-dir :title)) ds-title))
+    {:dataset ds-class :docids (map :id docs-shuffled)}))
 

@@ -116,7 +116,7 @@ user> ds
 user> (use 'clj-ml.data)
 nil
 
-user> (def ds (make-dataset"my-name" [:length :width {:style nil} {:kind [:good :bad]}]
+user> (def ds (make-dataset "my-name" [:length :width {:style nil} {:kind [:good :bad]}]
                             [[12 24 "longish" :good]
                              [8 5 "shortish" :bad]]))
 #'user/ds
@@ -299,13 +299,13 @@ Text document handling:
 ```clojure
 user> (def docs [{:title "Document title 1"
                   :fulltext "This is the fulltext..."
-                  :terms {"Topic" ["Sports"]}}
+                  :has-term? false}
                  {:title "Another document title"
                   :fulltext "Some more \"fulltext\"; rabbit artificial machine bananas"
-                  :terms {"Topic" ["Politics" "Food"]}}])
+                  :has-term? true}])
 #'user/docs
 
-user> (docs-to-dataset docs "Topic" "Sports" 1 "/tmp" :stemmer true :lowercase false)
+user> (docs-to-dataset docs "bananas-model" "my-models" :stemmer true :lowercase false)
 #<Instances @relation 'docs-weka.filters.unsupervised.attribute.StringToWordVector...'
 
 @attribute class {no,yes}
