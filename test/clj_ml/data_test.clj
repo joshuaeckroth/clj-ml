@@ -229,3 +229,20 @@
                           [3 :bar]
                           [4 :foo]])]
     (is (= (dataset-as-vecs (take-dataset ds 2)) [[1.0 :foo] [2.0 :bar]]))))
+
+(deftest docs-to-dataset-test
+  (let [docs [{:id 10
+               :title "Document title 1"
+               :fulltext "This is the fulltext..."
+               :has-class? false}
+              {:id 11
+               :title "Another document title"
+               :fulltext "Some more \"fulltext\"; rabbit artificial machine bananas"
+               :has-class? true}]
+        {:keys [dataset docids]} (docs-to-dataset docs "bananas-model" "."
+                                                  :stemmer true :lowercase false)
+        docid-ds-vecs (apply hash-map (interleave docids (dataset-as-vecs dataset)))]
+    (is (= [:no 0.4804530139182014 0.0 0.4804530139182014 0.0]
+           (get docid-ds-vecs 10)))
+    (is (= [:yes 0.0 0.4804530139182014 0.0 0.4804530139182014 0.0 0.4804530139182014 0.0 0.4804530139182014]
+           (get docid-ds-vecs 11)))))

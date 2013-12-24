@@ -297,12 +297,14 @@ user> (classifier-classify classifier2 instance)
 Text document handling:
 
 ```clojure
-user> (def docs [{:title "Document title 1"
+user> (def docs [{:id 10
+                  :title "Document title 1"
                   :fulltext "This is the fulltext..."
-                  :has-term? false}
-                 {:title "Another document title"
+                  :has-class? false}
+                 {:id 11
+                  :title "Another document title"
                   :fulltext "Some more \"fulltext\"; rabbit artificial machine bananas"
-                  :has-term? true}])
+                  :has-class? true}])
 #'user/docs
 
 user> (docs-to-dataset docs "bananas-model" "my-models" :stemmer true :lowercase false)

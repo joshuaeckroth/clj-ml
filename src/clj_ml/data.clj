@@ -534,7 +534,7 @@ split immediately you can use do-split-dataset."
   [docs model-prefix model-dir & opts]
   (let [parsed-opts (apply hash-map opts)
         original-ordering (map :id docs)
-        docs-with-class (filter :has-class? doc)
+        docs-with-class (filter :has-class? docs)
         docs-without-class (let [dwoc (filter #(not (:has-class? %)) docs)]
                              (if (:resample parsed-opts)
                                (take (count docs-with-class) dwoc)
@@ -543,7 +543,7 @@ split immediately you can use do-split-dataset."
                       (concat (take (/ (:keep-n parsed-opts) 2) docs-with-class)
                               (take (/ (:keep-n parsed-opts) 2) docs-without-class))
                       (concat docs-with-class docs-without-class))
-        docs-shuffled (my-shuffle (sort-by :id docs-keep-n))
+        docs-shuffled (shuffle (sort-by :id docs-keep-n))
         ds (make-dataset
             :docs [{:class [:no :yes]} {:title nil} {:fulltext nil}]
             (for [doc docs-shuffled]
