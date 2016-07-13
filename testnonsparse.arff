@@ -1,9 +1,10 @@
-@relation testsparse
+@relation testnonsparse
 
 @attribute a numeric
 @attribute b numeric
 @attribute c numeric
 
 @data
-{0 5.5, 2 7.7}
-{1 2.2}
+5.5, 0.0, 7.7
+0.0, 2.2, 0.0
+
