@@ -1,4 +1,4 @@
-(defproject cc.artifice/clj-ml "0.8.7"
+(defproject cc.artifice/clj-ml "0.8.8-SNAPSHOT"
   :description "Machine Learning library for Clojure built around Weka and friends"
   :java-source-paths ["src/java"]
   :license {:name "MIT License"
@@ -16,6 +16,8 @@
                  [nz.ac.waikato.cms.weka/racedIncrementalLogitBoost "1.0.2" :exclusions [nz.ac.waikato.cms.weka/weka-dev]]
                  [nz.ac.waikato.cms.weka/partialLeastSquares "1.0.4" :exclusions [nz.ac.waikato.cms.weka/weka-dev]]
                  [nz.ac.waikato.cms.weka/LibSVM "1.0.6" :exclusions [nz.ac.waikato.cms.weka/weka-dev tw.edu.ntu.csie/libsvm]]
+                 [nz.ac.waikato.cms.weka/metaCost "1.0.3" :exclusions [nz.ac.waikato.cms.weka/weka-dev]]
+                 [nz.ac.waikato.cms.weka/SMOTE "1.0.3" :exclusions [nz.ac.waikato.cms.weka/weka-dev]]
                  [junit/junit "4.11"]
                  [tw.edu.ntu.csie/libsvm "3.17"]
                  [org.clojure/data.xml "0.0.8"]

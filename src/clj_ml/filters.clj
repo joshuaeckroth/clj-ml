@@ -39,6 +39,7 @@
   (:use [clj-ml utils options-utils])
   (:require [clojure [string :as str]])
   (:import (weka.filters Filter)
+           (weka.filters.supervised.instance SMOTE)
            (weka.core OptionHandler)
            (cljml ClojureStreamFilter ClojureBatchFilter)))
 
@@ -147,6 +148,16 @@
         (check-options m {:unset-class "-unset-class-temporarily"})
         (check-option-values m {:scale "-S"
                                 :translation "-T"}))))
+
+(deffilter smote)
+
+(defmethod make-filter-options :smote
+  ([kind m]
+   (->> (extract-attributes m)
+        (check-option-values m {:random-seed "-S"
+                                :percentage-instances-to-create "-P"
+                                :number-of-nearest-neighbors "-K"
+                                :nominal-class-index "-C"}))))
 
 (deffilter normalize)
 
@@ -279,7 +290,9 @@
    :project-attributes weka.filters.unsupervised.attribute.Remove
    :stratified-remove-folds-supervised weka.filters.supervised.instance.StratifiedRemoveFolds
    :random-subset weka.filters.unsupervised.attribute.RandomSubset
-   :normalize weka.filters.unsupervised.attribute.Normalize})
+   :normalize weka.filters.unsupervised.attribute.Normalize
+   :smote weka.filters.supervised.instance.SMOTE
+   })
 
 (defn make-filter
   "Creates a filter for the provided attributes format. The first argument must be a symbol

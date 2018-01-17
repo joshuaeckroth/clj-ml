@@ -201,7 +201,27 @@
                             :random-seed 20}
                            )]
     (is (= (class c)
-           weka.classifiers.meta.Stacking))))
+           weka.classifiers.meta.Stacking))))            
+
+(deftest make-classifier-cost-sensitive
+  (let [c (make-classifier :meta :cost-sensitive
+                           {:random-seed 20
+                            :base-classifier-name "weka.classifiers.trees.DecisionStump"
+                            :cost-matrix "[0.0 5.0; 1.0 0.0]"
+                            }
+                           )]
+    (is (= (class c)
+           weka.classifiers.meta.CostSensitiveClassifier))))         
+
+(deftest make-classifier-meta-cost
+  (let [c (make-classifier :meta :meta-cost
+                           {:random-seed 20
+                            :base-classifier-name "weka.classifiers.trees.DecisionStump"
+                            :cost-matrix "[0.0 5.0; 1.0 0.0]"
+                            }
+                           )]
+    (is (= (class c)
+           weka.classifiers.meta.MetaCost))))
 
 (deftest make-classifier-boosted-stump
   (let [c (make-classifier :decision-tree :boosted-stump
